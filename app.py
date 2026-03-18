@@ -73,21 +73,9 @@ content_style = {
 }
 
 app.layout = html.Div([
-    # Store for data refresh
-    dcc.Interval(id='refresh-interval', interval=60*1000, n_intervals=0),  # Refresh every 60 seconds
-    dcc.Store(id='data-store'),
-
     # Left Sidebar - Filters
     html.Div([
         html.H2("Filters", style={'color': 'white', 'marginBottom': '20px', 'borderBottom': '2px solid #3498db', 'paddingBottom': '10px'}),
-
-        # Refresh button
-        html.Div([
-            html.Button('🔄 Refresh Data', id='refresh-btn',
-                       style={'width': '100%', 'padding': '10px', 'backgroundColor': '#3498db',
-                              'color': 'white', 'border': 'none', 'borderRadius': '5px',
-                              'cursor': 'pointer', 'marginBottom': '20px', 'fontWeight': 'bold'})
-        ]),
 
         html.Div([
             html.Label('Grade:', style={'fontWeight': 'bold', 'marginBottom': '5px', 'display': 'block'}),
@@ -151,8 +139,7 @@ app.layout = html.Div([
         # Data Summary in sidebar
         html.Div([
             html.H3("Data Summary", style={'color': 'white', 'marginBottom': '15px', 'borderBottom': '2px solid #3498db', 'paddingBottom': '10px'}),
-            html.Div(id='data-summary'),
-            html.Div(id='last-refresh', style={'marginTop': '15px', 'fontSize': '11px', 'color': '#95a5a6'})
+            html.Div(id='data-summary')
         ])
     ], style=sidebar_style),
 
@@ -175,29 +162,6 @@ app.layout = html.Div([
 
     ], style=content_style)
 ], style={'fontFamily': 'Arial, sans-serif'})
-
-
-@callback(
-    Output('data-store', 'data'),
-    [Input('refresh-btn', 'n_clicks'),
-     Input('refresh-interval', 'n_intervals')]
-)
-def refresh_data(n_clicks, n_intervals):
-    """Refresh data from Google Sheet"""
-    global df_filtered
-    df_filtered = load_data()
-    from datetime import datetime
-    return {'last_refresh': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'rows': len(df_filtered)}
-
-
-@callback(
-    Output('last-refresh', 'children'),
-    Input('data-store', 'data')
-)
-def update_refresh_time(data):
-    if data:
-        return f"Last refresh: {data['last_refresh']} ({data['rows']} rows)"
-    return ""
 
 
 def get_filtered_data(grade, curing, thickness, mix, project):
@@ -228,10 +192,9 @@ def get_filtered_data(grade, curing, thickness, mix, project):
      Input('curing-filter', 'value'),
      Input('thickness-filter', 'value'),
      Input('mix-filter', 'value'),
-     Input('project-filter', 'value'),
-     Input('data-store', 'data')]
+     Input('project-filter', 'value')]
 )
-def update_dropdown_options(grade, curing, thickness, mix, project, data):
+def update_dropdown_options(grade, curing, thickness, mix, project):
     """Update dropdown options based on current selections"""
 
     # Grade options: filter by all others except grade
@@ -316,10 +279,9 @@ def update_dropdown_options(grade, curing, thickness, mix, project, data):
      Input('curing-filter', 'value'),
      Input('thickness-filter', 'value'),
      Input('mix-filter', 'value'),
-     Input('project-filter', 'value'),
-     Input('data-store', 'data')]
+     Input('project-filter', 'value')]
 )
-def update_charts(grade, curing, thickness, mix, project, data):
+def update_charts(grade, curing, thickness, mix, project):
     # Filter data
     filtered = get_filtered_data(grade, curing, thickness, mix, project)
 
