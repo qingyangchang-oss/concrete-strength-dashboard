@@ -1,1 +1,1 @@
-web: gunicorn concrete_strength_dashboard:server
+web: gunicorn app:server
